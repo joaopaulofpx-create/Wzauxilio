@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wz Auxílio</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --blue:#1e90ff;
+  --card:#0b0f14;
+  --neon:0 0 18px rgba(30,144,255,.8);
+}
+*{box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#000;
+  color:#fff;
+  overflow:hidden;
+}
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:0;
+}
+.hidden{display:none}
+.app{
+  width:360px;
+  border-radius:18px;
+  background:#050a10;
+  border:1px solid #003a55;
+  box-shadow:var(--neon);
+  position:relative;
+  z-index:1;
+}
+.header{
+  padding:16px;
+  text-align:center;
+  background:#001c2b;
+  border-bottom:1px solid #004b70;
+}
+.header h1{
+  margin:0;
+  color:var(--blue);
+  font-weight:700;
+}
+
+.login,.panel{padding:16px}
+
+.login input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #003a55;
+  background:#04080d;
+  color:#fff;
+}
+.login .btn{margin-top:26px}
+
+.btn{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:0;
+  background:linear-gradient(180deg,#1e90ff,#005b88);
+  color:#fff;
+  font-weight:600;
+  font-size:15px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+.progress{
+  position:absolute;
+  left:0;top:0;
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,#1e90ff,#5bbcff);
+  box-shadow:0 0 15px #1e90ff;
+}
+
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{
+  flex:1;
+  text-align:center;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid #003a55;
+  cursor:pointer;
+  font-size:14px;
+}
+.tab.active{color:var(--blue);box-shadow:var(--neon)}
+
+.card{
+  background:var(--card);
+  border:1px solid #0f1a22;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+}
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.texts{display:flex;flex-direction:column}
+.title{font-size:14px;font-weight:600}
+.desc{font-size:11px;opacity:.6}
+
+.switch{
+  width:46px;
+  height:24px;
+  border-radius:20px;
+  background:#1b2a35;
+  position:relative;
+  cursor:pointer;
+}
+.switch::after{
+  content:"";
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#6f8fa3;
+  transition:.2s;
+}
+.switch.on{background:#003f66}
+.switch.on::after{left:25px;background:var(--blue)}
+
+.status{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:6px;
+  margin-bottom:12px;
+}
+.box{
+  background:#050a10;
+  border:1px solid #003a55;
+  border-radius:12px;
+  padding:10px;
+  text-align:center;
+  box-shadow:var(--neon);
+  font-size:12px;
+}
+.box span{
+  display:block;
+  font-size:20px;
+  color:var(--blue);
+  font-weight:700;
+}
+
+/* SUPORTE */
+.support-title{
+  font-size:12px;
+  font-weight:600;
+  color:#1e90ff;
+  margin-bottom:8px;
+  text-align:center;
+  letter-spacing:.5px;
+}
+.discord-btn{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #003a55;
+  background:linear-gradient(180deg,#5865F2,#404EED);
+  color:#fff;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 0 15px rgba(88,101,242,.6);
+}
+.discord-btn:hover{filter:brightness(1.1)}
+
+.footer{
+  text-align:center;
+  font-size:11px;
+  opacity:.6;
+  padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="particles"></canvas>
+
+<div class="app">
+  <div class="header"><h1>Wz Auxílio</h1></div>
+
+  <div class="login" id="login">
+    <input id="keyInput" placeholder="Digite sua KEY">
+    <button class="btn" onclick="entrar()">ENTRAR</button>
+    <p id="erro" style="color:#ff4d4d;display:none"></p>
+  </div>
+
+  <div class="panel hidden" id="panel">
+
+    <div class="status">
+      <div class="box">FPS<span id="fps">0</span></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="tab(0)">Funções</div>
+      <div class="tab" onclick="tab(1)">Desempenho</div>
+      <div class="tab" onclick="tab(2)">Informações</div>
+    </div>
+
+    <!-- FUNÇÕES -->
+    <div class="tabc">
+      <div class="card row">
+        <div class="texts">
+          <span class="title">Precisão Full</span>
+          <span class="desc">Aumenta a precisão da mira.</span>
+        </div>
+        <div class="switch" onclick="toggleSwitch(this)"></div>
+      </div>
+
+      <div class="card row">
+        <div class="texts">
+          <span class="title">Reduzir Recuo</span>
+          <span class="desc">Diminui o recuo da arma.</span>
+        </div>
+        <div class="switch" onclick="toggleSwitch(this)"></div>
+      </div>
+
+      <div class="card row">
+        <div class="texts">
+          <span class="title">Estabilizar Mira</span>
+          <span class="desc">Mais estabilidade ao atirar.</span>
+        </div>
+        <div class="switch" onclick="toggleSwitch(this)"></div>
+      </div>
+    </div>
+
+    <!-- DESEMPENHO -->
+    <div class="tabc hidden">
+      <div class="card row">
+        <div class="texts">
+          <span class="title">120 FPS</span>
+          <span class="desc">Libera FPS mais alto.</span>
+        </div>
+        <div class="switch" id="fps120" onclick="toggleSwitch(this)"></div>
+      </div>
+
+      <div class="card row">
+        <div class="texts">
+          <span class="title">Remover Input Lag</span>
+          <span class="desc">Resposta mais rápida.</span>
+        </div>
+        <div class="switch" onclick="toggleSwitch(this)"></div>
+      </div>
+    </div>
+
+    <!-- INFORMAÇÕES -->
+    <div class="tabc hidden">
+      <div class="card">
+        <b>Status da Key:</b> ATIVA<br>
+        <small>Tempo restante:</small>
+        <span id="tempoKey" style="color:#1e90ff;font-weight:600"></span>
+      </div>
+
+      <div class="card"><b>Criador:</b> whizezz</div>
+
+      <div class="card">
+        <div class="support-title">SUPORTE</div>
+        <button class="discord-btn" onclick="abrirDiscord()">
+          Entrar no Discord
+        </button>
+      </div>
+    </div>
+
+    <button class="btn" onclick="injetar()">
+      <div class="progress" id="progress"></div>
+      <span id="btnText">ABRIR O FREE FIRE</span>
+    </button>
+  </div>
+
+  <div class="footer">© Wz Auxílio</div>
+</div>
+
+<script>
+/* PARTÍCULAS */
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+let w,h,parts=[];
+function resize(){w=canvas.width=innerWidth;h=canvas.height=innerHeight;}
+window.onresize=resize;resize();
+for(let i=0;i<80;i++){
+  parts.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2+1,
+    vx:(Math.random()-.5)*0.4,vy:(Math.random()-.5)*0.4});
+}
+function draw(){
+  ctx.clearRect(0,0,w,h);
+  parts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>w)p.vx*=-1;
+    if(p.y<0||p.y>h)p.vy*=-1;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle="rgba(30,144,255,.6)";
+    ctx.fill();
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* SCRIPT */
+const login=document.getElementById("login");
+const panel=document.getElementById("panel");
+const erro=document.getElementById("erro");
+const keyInput=document.getElementById("keyInput");
+const tabs=document.querySelectorAll(".tab");
+const tabc=document.querySelectorAll(".tabc");
+let expiraEm=0;
+
+function entrar(){
+  const key=keyInput.value.trim();
+  if(key===""){erro.innerText="Digite uma key válida";erro.style.display="block";return;}
+  const registro=localStorage.getItem("KEY_"+key);
+  if(!registro){erro.innerText="Key inválida";erro.style.display="block";return;}
+  expiraEm=parseInt(registro);
+  if(Date.now()>expiraEm){erro.innerText="Key expirada";erro.style.display="block";return;}
+  erro.style.display="none";
+  login.classList.add("hidden");
+  panel.classList.remove("hidden");
+  tab(0);
+  startStats();
+  atualizarTempoKey();
+}
+
+function atualizarTempoKey(){
+  const diff=expiraEm-Date.now();
+  const el=document.getElementById("tempoKey");
+  if(diff<=0){el.innerText="EXPIRADA";el.style.color="#ff4d4d";return;}
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor(diff/3600000%24);
+  const m=Math.floor(diff/60000%60);
+  el.innerText=`${d}d ${h}h ${m}m`;
+}
+setInterval(atualizarTempoKey,60000);
+
+function tab(i){
+  tabs.forEach(t=>t.classList.remove("active"));
+  tabc.forEach(c=>c.classList.add("hidden"));
+  tabs[i].classList.add("active");
+  tabc[i].classList.remove("hidden");
+}
+
+function toggleSwitch(el){el.classList.toggle("on");}
+
+let fpsAtual=60;
+function startStats(){
+  function atualizarFPS(){
+    fpsAtual=fps120.classList.contains("on")
+      ?Math.floor(Math.random()*17)+110
+      :Math.floor(Math.random()*26)+37;
+    fps.innerText=fpsAtual;
+    setTimeout(atualizarFPS,Math.random()*600+1200);
+  }
+  atualizarFPS();
+}
+
+function injetar(){
+  let p=0;
+  btnText.innerText="INJETANDO...";
+  const i=setInterval(()=>{
+    p+=8;
+    progress.style.width=p+"%";
+    if(p>=100){
+      clearInterval(i);
+      window.location.href="intent://launch/#Intent;package=com.dts.freefireth;end";
+    }
+  },120);
+}
+
+function abrirDiscord(){
+  window.open("https://discord.gg/hqbRpy7Pfw","_blank");
+}
+</script>
+
+</body>
+</html>
